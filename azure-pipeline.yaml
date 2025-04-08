@@ -4,7 +4,7 @@ trigger:
       - main
 
 pool:
-  vmImage: 'Default'
+  name: Default
 
 variables:
   node_version: '18.x'
@@ -23,3 +23,38 @@ stages:
               npm install
               npm run test || echo "No tests yet"
             displayName: 'Install and Test Backend'
+
+  - stage: Deliver
+    jobs:
+      - job: PackageApp
+        steps:
+          - script: echo "Packaging backend files for deployment"
+            displayName: 'Deliver Stage (Mocked Packaging)'
+
+  - stage: DeployToDev
+    jobs:
+      - job: DeployDev
+        steps:
+          - script: echo "Deploying to Dev Environment (Mock)"
+            displayName: 'Dev Deployment'
+
+  - stage: DeployToQAT
+    jobs:
+      - job: DeployQAT
+        steps:
+          - script: echo "Deploying to QAT Environment (Mock)"
+            displayName: 'QAT Deployment'
+
+  - stage: DeployToStaging
+    jobs:
+      - job: DeployStaging
+        steps:
+          - script: echo "Deploying to Staging Environment (Mock)"
+            displayName: 'Staging Deployment'
+
+  - stage: DeployToProduction
+    jobs:
+      - job: DeployProd
+        steps:
+          - script: echo "Deploying to Production Environment (Mock)"
+            displayName: 'Production Deployment'
