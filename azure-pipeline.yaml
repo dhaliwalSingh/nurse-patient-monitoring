@@ -4,7 +4,7 @@ trigger:
       - main
 
 pool:
-  name: Default  # or your self-hosted agent pool name
+  name: Default
 
 variables:
   node_version: '18.x'
