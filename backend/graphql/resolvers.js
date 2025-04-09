@@ -1,8 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const authMiddleware = require('../middleware/auth');  // ✅ Import Auth Middleware
+const authMiddleware = require('../middleware/auth');
 require('dotenv').config();
+const Vitals = require('../models/Vitals');
 
 const resolvers = {
     Query: {
@@ -11,11 +12,18 @@ const resolvers = {
                 const user = authMiddleware(context);  // ✅ Verify Token
                 if (user.role !== 'nurse') throw new Error('Access Denied');
 
-                return await User.find();
+                return await User.find({ role: "patient" });
+
             } catch (error) {
                 console.error('❌ Error fetching users:', error);
                 return [];
             }
+        },
+
+        getAllUsers: async (_, __, context) => {
+            const user = authMiddleware(context);
+            if (user.role !== 'nurse') throw new Error('Access Denied');
+            return await User.find(); // ✅ all users
         },
     },
 
@@ -65,6 +73,14 @@ const resolvers = {
                 console.error('❌ Login Error:', error);
                 return null;
             }
+        },
+
+        addVitals: async (_, args, context) => {
+            const nurse = authMiddleware(context); // Verify Token
+            if (nurse.role !== 'nurse') throw new Error('Unauthorized');
+
+            const vitals = new Vitals({...args});
+            return await vitals.save();
         }
     }
 };

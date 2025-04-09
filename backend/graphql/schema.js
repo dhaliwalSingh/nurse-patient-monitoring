@@ -7,9 +7,30 @@ const typeDefs = gql`
         email: String!
         role: String!
     }
+    
+    type Vitals {
+        id: ID!
+        patientId: ID!
+        temperature: Float
+        heartRate: Int
+        bloodPressure: String
+        respiratoryRate: Int
+        createdAt: String
+    }
+    
+    extend type Mutation {
+        addVitals(
+            patientId: ID!
+            temperature: Float
+            heartRate: Int
+            bloodPressure: String
+            respiratoryRate: Int
+        ): Vitals
+    }
 
     type Query {
         getUsers: [User]
+        getAllUsers: [User]
     }
 
     type Mutation {
