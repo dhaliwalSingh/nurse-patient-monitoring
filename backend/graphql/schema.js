@@ -18,6 +18,13 @@ const typeDefs = gql`
         createdAt: String
     }
     
+    type Alert {
+        id: ID!
+        patientId: ID!
+        message: String!
+        createdAt: String
+    }
+    
     extend type Mutation {
         addVitals(
             patientId: ID!
@@ -26,6 +33,8 @@ const typeDefs = gql`
             bloodPressure: String
             respiratoryRate: Int
         ): Vitals
+
+        createEmergencyAlert(message: String!): Alert
     }
 
     type Query {

@@ -4,6 +4,7 @@ const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
 require('dotenv').config();
 const Vitals = require('../models/Vitals');
+const Alert = require('../models/Alert');
 
 const resolvers = {
     Query: {
@@ -81,7 +82,20 @@ const resolvers = {
 
             const vitals = new Vitals({...args});
             return await vitals.save();
+        },
+
+        createEmergencyAlert: async (_, { message }, context) => {
+            const user = authMiddleware(context);
+            if (user.role !== 'patient') throw new Error('Only patients can create alerts');
+
+            const alert = new Alert({
+                patientId: user.userId,
+                message
+            });
+
+            return await alert.save();
         }
+
     }
 };
 

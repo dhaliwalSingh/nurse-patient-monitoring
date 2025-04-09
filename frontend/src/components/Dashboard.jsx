@@ -1,5 +1,6 @@
 import { jwtDecode } from "jwt-decode";
 import EnterVitalsForm from "./EnterVitalsForm.jsx";
+import EmergencyAlertForm from "./EmergencyAlertForm.jsx";
 
 export default function Dashboard({ token }) {
     if (!token) return <p>Not logged in</p>;
@@ -19,6 +20,7 @@ export default function Dashboard({ token }) {
             {role === "patient" && (
                 <div>
                     <p className="mb-2">💊 You can submit symptoms, enter daily info, and send emergency alerts.</p>
+                    <EmergencyAlertForm />
                 </div>
             )}
         </div>
