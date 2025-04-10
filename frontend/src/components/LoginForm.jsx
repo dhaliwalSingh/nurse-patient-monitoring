@@ -20,6 +20,12 @@ export default function LoginForm({ onLogin }) {
         e.preventDefault();
         setError("");
 
+        // Basic Input validation
+        if(!formData.email.trim() || !formData.password.trim()) {
+            setError("Email and password are required.");
+            return;
+        }
+
         try {
             const { data } = await login({
                 variables: {
@@ -31,7 +37,7 @@ export default function LoginForm({ onLogin }) {
             const token = data.login;
             if (!token) throw new Error("Invalid credentials");
 
-            localStorage.setItem("token", token); // ✅ Store JWT
+            localStorage.setItem("token", token); // Store JWT
             onLogin?.(token);
         } catch (err) {
             setError(err.message || "Login failed.");
