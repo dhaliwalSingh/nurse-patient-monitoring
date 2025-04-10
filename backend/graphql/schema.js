@@ -7,7 +7,7 @@ const typeDefs = gql`
         email: String!
         role: String!
     }
-    
+
     type Vitals {
         id: ID!
         patientId: ID!
@@ -17,15 +17,31 @@ const typeDefs = gql`
         respiratoryRate: Int
         createdAt: String
     }
-    
+
     type Alert {
         id: ID!
         patientId: ID!
         message: String!
         createdAt: String
     }
-    
-    extend type Mutation {
+
+    type Tip {
+        id: ID!
+        message: String!
+        createdBy: User!
+        createdAt: String
+    }
+
+    type Query {
+        getUsers: [User]
+        getAllUsers: [User]
+        getTips: [Tip]
+    }
+
+    type Mutation {
+        register(username: String!, email: String!, password: String!, role: String!): User
+        login(email: String!, password: String!): String
+
         addVitals(
             patientId: ID!
             temperature: Float
@@ -35,16 +51,7 @@ const typeDefs = gql`
         ): Vitals
 
         createEmergencyAlert(message: String!): Alert
-    }
-
-    type Query {
-        getUsers: [User]
-        getAllUsers: [User]
-    }
-
-    type Mutation {
-        register(username: String!, email: String!, password: String!, role: String!): User
-        login(email: String!, password: String!): String
+        createTip(message: String!): Tip
     }
 `;
 

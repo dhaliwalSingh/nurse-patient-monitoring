@@ -5,6 +5,7 @@ const authMiddleware = require('../middleware/auth');
 require('dotenv').config();
 const Vitals = require('../models/Vitals');
 const Alert = require('../models/Alert');
+const Tip = require('../models/Tip');
 
 const resolvers = {
     Query: {
@@ -94,8 +95,15 @@ const resolvers = {
             });
 
             return await alert.save();
-        }
+        },
 
+        createTip: async (_, { message }, context) => {
+            const user = authMiddleware(context);
+            if (user.role !== "nurse") throw new Error("Only nurses can create tips");
+
+            const tip = new Tip({ message, createdBy: user.userId });
+            return await tip.save();
+        },
     }
 };
 
