@@ -17,20 +17,20 @@ export default function AISuggestionForPatient() {
     };
 
     return (
-        <div className="bg-white p-6 rounded shadow mt-6">
-            <h3 className="text-xl font-semibold mb-4">🤖 AI Symptom Insights</h3>
+        <div className="bg-white p-6 rounded-xl shadow-md mt-6 w-full max-w-2xl">
+            <h3 className="text-2xl font-bold mb-4 text-green-700">🤖 AI Symptom Insights</h3>
 
             <button
                 onClick={handleFetch}
-                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition"
             >
                 Get Friendly Advice
             </button>
 
-            {loading && <p className="mt-4 text-blue-600">Analyzing your symptoms...</p>}
+            {loading && <p className="mt-4 text-green-600">Analyzing your symptoms...</p>}
             {error && <p className="text-red-500 mt-2">Error: {error.message}</p>}
             {fetched && !loading && !error && (
-                <div className="mt-4 bg-gray-100 p-4 rounded text-sm whitespace-pre-wrap text-gray-800">
+                <div className="mt-4 bg-gray-100 p-4 rounded text-sm whitespace-pre-wrap text-gray-800 leading-relaxed">
                     {data?.getPatientSymptomInsight}
                 </div>
             )}

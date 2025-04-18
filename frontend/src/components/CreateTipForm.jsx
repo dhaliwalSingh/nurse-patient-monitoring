@@ -5,32 +5,32 @@ const CREATE_TIP = gql`
     mutation CreateTip($message: String!) {
         createTip(message: $message) {
             id
-            createdAt
         }
-    }    
+    }
 `;
 
 export default function CreateTipForm() {
     const [message, setMessage] = useState("");
-    const [createTip, {data, loading}] = useMutation(CREATE_TIP);
+    const [createTip] = useMutation(CREATE_TIP);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!message.trim()) return;
         await createTip({ variables: { message } });
         setMessage("");
+        alert("Tip created!");
     };
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow max-w-md mx-auto mt-8">
-      <textarea
-          className="w-full border rounded p-2 mb-4"
-          placeholder="Enter daily motivational tip"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-      />
-            <button className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
-                {loading ? "Submitting..." : "Submit Tip"}
-            </button>
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="w-full border p-2 rounded"
+                placeholder="Write a motivational tip..."
+                required
+            />
+            <button className="bg-blue-600 text-white px-4 py-2 rounded">Send Tip</button>
         </form>
     );
 }

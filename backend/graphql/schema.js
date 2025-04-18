@@ -33,7 +33,7 @@ const typeDefs = gql`
         createdBy: User!
         createdAt: String
     }
-    
+
     type Symptom {
         id: ID!
         patientId: ID!
@@ -48,9 +48,11 @@ const typeDefs = gql`
         getVitalsByPatient(patientId: ID!): [Vitals]
         getAllAlerts: [Alert]
         getSymptomsByPatient(patientId: ID!): [Symptom]
-        getAISuggestion(patientId: ID!): String
+        getMySymptoms: [Symptom]
+        getAISuggestion(patientId: ID!, followUp: String): String
         getAIHealthAdvice(patientId: ID!): String
         getPatientSymptomInsight: String
+        chatWithAI(message: String!): String
     }
 
     type Mutation {
@@ -67,11 +69,9 @@ const typeDefs = gql`
 
         createEmergencyAlert(message: String!): Alert
         createTip(message: String!): Tip
-        
         markAlertResolved(id: ID!, notes: String): Alert
         deleteAlert(id: ID!): Boolean
-        
-        addSymptom(description: String!): Symptom
+        addSymptom(descriptions: [String!]!): Boolean
     }
 `;
 

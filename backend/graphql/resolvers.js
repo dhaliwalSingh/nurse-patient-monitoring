@@ -6,7 +6,7 @@ const Alert = require('../models/Alert');
 const Tip = require('../models/Tip');
 const Symptom = require('../models/Symptom');
 const authMiddleware = require('../middleware/auth');
-const { getGeminiSuggestion } = require('../utils/geminiHelper'); // ✅ Gemini function
+const { getGeminiSuggestion } = require('../utils/geminiHelper');
 require('dotenv').config();
 
 const resolvers = {
@@ -15,6 +15,11 @@ const resolvers = {
             const user = authMiddleware(context);
             if (user.role !== 'nurse') throw new Error('Access Denied');
             return await User.find({ role: "patient" });
+        },
+
+        getTips: async (_, __, context) => {
+            const user = authMiddleware(context);
+            return await Tip.find().populate("createdBy").sort({ createdAt: -1 });
         },
 
         getAllUsers: async (_, __, context) => {
@@ -35,6 +40,12 @@ const resolvers = {
             return await Alert.find().populate("patientId").sort({ createdAt: -1 });
         },
 
+        getMySymptoms: async (_, __, context) => {
+            const user = authMiddleware(context);
+            if (user.role !== "patient") throw new Error("Unauthorized");
+            return await Symptom.find({ patientId: user.userId }).sort({ createdAt: -1 });
+        },
+
         getSymptomsByPatient: async (_, { patientId }, context) => {
             const user = authMiddleware(context);
             if (user.role !== "nurse") throw new Error("Only nurses can view symptoms");
@@ -49,13 +60,18 @@ const resolvers = {
             const symptoms = await Symptom.find({ patientId }).sort({ createdAt: -1 }).limit(3);
 
             const prompt = `
-Patient has the following recent vitals:
-${vitals.map(v => `- Temp: ${v.temperature}°C, HR: ${v.heartRate}bpm, BP: ${v.bloodPressure}, RR: ${v.respiratoryRate}`).join('\n')}
+You are an experienced nurse assistant AI.
 
-And reported symptoms:
+Here is the recent data for a patient:
+
+🩺 Vitals:
+${vitals.map(v => `- Temp: ${v.temperature}°C, HR: ${v.heartRate} bpm, BP: ${v.bloodPressure}, RR: ${v.respiratoryRate}`).join('\n')}
+
+😷 Symptoms:
 ${symptoms.map(s => `- ${s.description}`).join('\n')}
 
-Based on this, provide a professional nurse-level health suggestion or possible next steps (avoid diagnosis).
+Based on this data, provide a concise and professional nursing action plan or next steps. 
+Avoid diagnosis, but include any necessary precautions or red flags. First briefly summarize the vitals and symptoms.
 `;
 
             return await getGeminiSuggestion(prompt);
@@ -69,15 +85,14 @@ Based on this, provide a professional nurse-level health suggestion or possible 
             const vitals = await Vitals.find({ patientId }).sort({ createdAt: -1 });
 
             const prompt = `
-Given the following patient's recent vitals and symptoms:
+Given the following patient's vitals and symptoms:
 Symptoms:
-${symptoms.map((s) => `- ${s.description}`).join("\n")}
+${symptoms.map(s => `- ${s.description}`).join('\n')}
 
 Vitals:
-${vitals.map((v) => `- Temp: ${v.temperature}, HR: ${v.heartRate}, BP: ${v.bloodPressure}, RR: ${v.respiratoryRate}`).join("\n")}
+${vitals.map(v => `- Temp: ${v.temperature}, HR: ${v.heartRate}, BP: ${v.bloodPressure}, RR: ${v.respiratoryRate}`).join('\n')}
 
-Please provide a concise health suggestion.
-`;
+Provide a professional but concise health suggestion for a nurse.`;
 
             return await getGeminiSuggestion(prompt);
         },
@@ -88,17 +103,22 @@ Please provide a concise health suggestion.
 
             const symptoms = await Symptom.find({ patientId: user.userId }).sort({ createdAt: -1 }).limit(3);
 
-            if (!symptoms.length) return "Please submit symptoms to receive suggestions.";
+            if (!symptoms.length) return "Please enter your symptoms to get feedback.";
 
             const prompt = `
-You are an AI health assistant. The patient has reported the following symptoms:
-${symptoms.map(s => `- ${s.description}`).join("\n")}
+The patient reports:
+${symptoms.map(s => `- ${s.description}`).join('\n')}
 
-Please provide a friendly, reassuring tip or next step the patient can take. Do not make any diagnosis.
-`;
+Respond in a calm, friendly way with a tip or gentle next step. No diagnosis.`;
 
             return await getGeminiSuggestion(prompt);
-        }
+        },
+
+        chatWithAI: async (_, { message }, context) => {
+            const user = authMiddleware(context);
+            const prompt = `Patient says: "${message}". Respond helpfully, warmly, and without diagnosis.`;
+            return await getGeminiSuggestion(prompt);
+        },
     },
 
     Mutation: {
@@ -138,7 +158,9 @@ Please provide a friendly, reassuring tip or next step the patient can take. Do 
         createTip: async (_, { message }, context) => {
             const user = authMiddleware(context);
             if (user.role !== "nurse") throw new Error("Only nurses can create tips");
-            return await new Tip({ message, createdBy: user.userId }).save();
+
+            const tip = new Tip({ message, createdBy: user.userId });
+            return await tip.save();
         },
 
         markAlertResolved: async (_, { id, notes }, context) => {
@@ -154,10 +176,17 @@ Please provide a friendly, reassuring tip or next step the patient can take. Do 
             return true;
         },
 
-        addSymptom: async (_, { description }, context) => {
+        addSymptom: async (_, { descriptions }, context) => {
             const user = authMiddleware(context);
             if (user.role !== "patient") throw new Error("Only patients can submit symptoms");
-            return await new Symptom({ patientId: user.userId, description }).save();
+
+            const entries = descriptions.map(desc => ({
+                patientId: user.userId,
+                description: desc
+            }));
+
+            await Symptom.insertMany(entries);
+            return true;
         },
     }
 };
