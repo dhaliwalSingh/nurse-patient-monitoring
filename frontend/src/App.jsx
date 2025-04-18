@@ -41,15 +41,7 @@ function App() {
                     {view === "login" ? <LoginForm onLogin={handleLogin} /> : <RegisterForm />}
                 </>
             ) : (
-                <div className="flex flex-col items-center">
-                    <Dashboard token={token} />
-                    <button
-                        className="mt-6 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-                        onClick={handleLogout}
-                    >
-                        Logout
-                    </button>
-                </div>
+                <Dashboard token={token} onLogout={handleLogout} />
             )}
         </div>
     );
