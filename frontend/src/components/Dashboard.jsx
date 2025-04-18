@@ -6,6 +6,9 @@ import CreateTipForm from "./CreateTipForm.jsx";
 import TipsList from "./TipsList.jsx";
 import VitalsHistory from "./VitalsHistory.jsx";
 import Navbar from "./Navbar.jsx";
+import EmergencyAlertList from "./EmergencyAlertList.jsx";
+import SymptomForm from "./SymptomForm.jsx";
+import SymptomsViewer from "./SymptomsViewer.jsx";
 
 const GET_USERS = gql`
     query GetUsers {
@@ -18,12 +21,16 @@ const GET_USERS = gql`
 `;
 
 export default function Dashboard({ token }) {
-    if (!token) return <p className="text-center mt-10 text-red-600">Not logged in</p>;
-
-    const decoded = jwtDecode(token);
+    const decoded = token ? jwtDecode(token) : null;
     const role = decoded?.role;
 
-    const { data: patientsData, loading: patientsLoading } = useQuery(GET_USERS);
+    const { data: patientsData, loading: patientsLoading } = useQuery(GET_USERS, {
+        skip: !token || role !== "nurse", // ✅ avoid query for non-nurse or no token
+    });
+
+    if (!token) {
+        return <p className="text-center mt-10 text-red-600">Not logged in</p>;
+    }
 
     return (
         <>
@@ -37,6 +44,20 @@ export default function Dashboard({ token }) {
                         <section className="bg-white p-6 rounded-lg shadow">
                             <h3 className="text-xl font-semibold mb-4">🩺 Enter Patient Vitals</h3>
                             <EnterVitalsForm />
+                        </section>
+
+                        <section className="bg-white p-6 rounded-lg shadow">
+                            <h3 className="text-xl font-semibold mb-4">🚨 Emergency Alerts</h3>
+                            <EmergencyAlertList />
+                        </section>
+
+                        <section className="bg-white p-6 rounded-lg shadow">
+                            <h3 className="text-xl font-semibold mb-4">😷 View Patient Symptoms</h3>
+                            {patientsLoading ? (
+                                <p>Loading patient list...</p>
+                            ) : (
+                                <SymptomsViewer patients={patientsData?.getUsers || []} />
+                            )}
                         </section>
 
                         <section className="bg-white p-6 rounded-lg shadow">
@@ -60,6 +81,11 @@ export default function Dashboard({ token }) {
                         <section className="bg-white p-6 rounded-lg shadow">
                             <h3 className="text-xl font-semibold mb-4">🚨 Emergency Alert</h3>
                             <EmergencyAlertForm />
+                        </section>
+
+                        <section className="bg-white p-6 rounded-lg shadow">
+                            <h3 className="text-xl font-semibold mb-4">😷 Enter Symptoms</h3>
+                            <SymptomForm />
                         </section>
 
                         <section className="bg-white p-6 rounded-lg shadow">

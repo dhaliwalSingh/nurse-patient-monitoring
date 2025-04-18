@@ -20,9 +20,11 @@ const typeDefs = gql`
 
     type Alert {
         id: ID!
-        patientId: ID!
+        patientId: User!
         message: String!
         createdAt: String
+        resolved: Boolean
+        notes: String
     }
 
     type Tip {
@@ -31,12 +33,21 @@ const typeDefs = gql`
         createdBy: User!
         createdAt: String
     }
+    
+    type Symptom {
+        id: ID!
+        patientId: ID!
+        description: String!
+        createdAt: String
+    }
 
     type Query {
         getUsers: [User]
         getAllUsers: [User]
         getTips: [Tip]
         getVitalsByPatient(patientId: ID!): [Vitals]
+        getAllAlerts: [Alert]
+        getSymptomsByPatient(patientId: ID!): [Symptom]
     }
 
     type Mutation {
@@ -53,6 +64,11 @@ const typeDefs = gql`
 
         createEmergencyAlert(message: String!): Alert
         createTip(message: String!): Tip
+        
+        markAlertResolved(id: ID!, notes: String): Alert
+        deleteAlert(id: ID!): Boolean
+        
+        addSymptom(description: String!): Symptom
     }
 `;
 

@@ -6,6 +6,7 @@ require('dotenv').config();
 const Vitals = require('../models/Vitals');
 const Alert = require('../models/Alert');
 const Tip = require('../models/Tip');
+const Symptom = require('../models/Symptom');
 
 const resolvers = {
     Query: {
@@ -34,6 +35,20 @@ const resolvers = {
 
             return await Vitals.find({ patientId }).sort({ createdAt: -1 }); // ✅ Return the data
         },
+
+        getAllAlerts: async (_, __, context) => {
+            const nurse = authMiddleware(context);
+            if (nurse.role !== 'nurse') throw new Error("Access Denied");
+
+            return await Alert.find().populate("patientId").sort({ createdAt: -1 }); // ✅ populate "patientId"
+        },
+
+        getSymptomsByPatient: async (_, { patientId }, context) => {
+            const user = authMiddleware(context);
+            if (user.role !== "nurse") throw new Error("Only nurses can view symptoms");
+
+            return await Symptom.find({ patientId }).sort({ createdAt: -1 });
+        }
 
     },
 
@@ -111,6 +126,31 @@ const resolvers = {
 
             const tip = new Tip({ message, createdBy: user.userId });
             return await tip.save();
+        },
+
+        markAlertResolved: async (_, {id, notes}, context) => {
+            const user = authMiddleware(context);
+            if (user.role !== "nurse") throw new Error("Unauthorized");
+            return await Alert.findByIdAndUpdate(id, {resolved: true, notes}, {new: true});
+        },
+
+        deleteAlert: async (_, { id }, context) => {
+            const user = authMiddleware(context);
+            if (user.role !== "nurse") throw new Error("Unauthorized");
+
+            const alert = await Alert.findById(id);
+            if (!alert) throw new Error("Alert not found");
+
+            await Alert.findByIdAndDelete(id);
+            return true;
+        },
+
+        addSymptom: async (_, { description }, context) => {
+            const user = authMiddleware(context);
+            if (user.role !== "patient") throw new Error("Only patients can submit symptoms");
+
+            const symptom = new Symptom({ patientId: user.userId, description });
+            return await symptom.save();
         },
     }
 };
