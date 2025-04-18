@@ -36,6 +36,7 @@ const typeDefs = gql`
         getUsers: [User]
         getAllUsers: [User]
         getTips: [Tip]
+        getVitalsByPatient(patientId: ID!): [Vitals]
     }
 
     type Mutation {

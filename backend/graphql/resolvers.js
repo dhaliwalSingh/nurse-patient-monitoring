@@ -27,6 +27,14 @@ const resolvers = {
             if (user.role !== 'nurse') throw new Error('Access Denied');
             return await User.find(); // ✅ all users
         },
+
+        getVitalsByPatient: async (_, { patientId }, context) => {
+            const nurse = authMiddleware(context);
+            if (nurse.role !== 'nurse') throw new Error('Unauthorized');
+
+            return await Vitals.find({ patientId }).sort({ createdAt: -1 }); // ✅ Return the data
+        },
+
     },
 
     Mutation: {
