@@ -48,6 +48,9 @@ const typeDefs = gql`
         getVitalsByPatient(patientId: ID!): [Vitals]
         getAllAlerts: [Alert]
         getSymptomsByPatient(patientId: ID!): [Symptom]
+        getAISuggestion(patientId: ID!): String
+        getAIHealthAdvice(patientId: ID!): String
+        getPatientSymptomInsight: String
     }
 
     type Mutation {

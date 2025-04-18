@@ -9,6 +9,8 @@ import Navbar from "./Navbar.jsx";
 import EmergencyAlertList from "./EmergencyAlertList.jsx";
 import SymptomForm from "./SymptomForm.jsx";
 import SymptomsViewer from "./SymptomsViewer.jsx";
+import AISuggestionForNurse from "./AISuggestionForNurse";
+import AISuggestionForPatient from "./AISuggestionForPatient.jsx";
 
 const GET_USERS = gql`
     query GetUsers {
@@ -44,6 +46,11 @@ export default function Dashboard({ token }) {
                         <section className="bg-white p-6 rounded-lg shadow">
                             <h3 className="text-xl font-semibold mb-4">🩺 Enter Patient Vitals</h3>
                             <EnterVitalsForm />
+                        </section>
+
+                        <section className="bg-white p-6 rounded-lg shadow">
+                            <h3 className="text-xl font-semibold mb-4">🧠 AI Suggestion</h3>
+                            <AISuggestionForNurse patients={patientsData?.getUsers || []} />
                         </section>
 
                         <section className="bg-white p-6 rounded-lg shadow">
@@ -86,6 +93,11 @@ export default function Dashboard({ token }) {
                         <section className="bg-white p-6 rounded-lg shadow">
                             <h3 className="text-xl font-semibold mb-4">😷 Enter Symptoms</h3>
                             <SymptomForm />
+                        </section>
+
+                        <section className="bg-white p-6 rounded-lg shadow">
+                            <h3 className="text-xl font-semibold mb-4">🧠 Get Personalized Symptom Advice</h3>
+                            <AISuggestionForPatient />
                         </section>
 
                         <section className="bg-white p-6 rounded-lg shadow">
