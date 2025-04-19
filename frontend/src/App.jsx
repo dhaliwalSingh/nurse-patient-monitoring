@@ -20,7 +20,7 @@ function App() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
+        <div className="min-h-screen bg-gray-100 flex flex-col px-4">
             {!token ? (
                 <>
                     <div className="flex space-x-4 mb-6">
